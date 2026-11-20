@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VaultLock – Military-grade file encryption</title>
+<style>
+:root{color-scheme:dark;--bg:#17191c;--panel:#eceff1;--ink:#fff;--mute:#9aa4ad;--line:#2c3238;--bad:#d93025;--amber:#e8a33d;--good:#2e9e5b;--teal:#fff;--on:#000;--cond:Bahnschrift,"Arial Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+.hidden{display:none!important}
+.bar{background:#fff;color:#000;text-align:center;font:700 13px var(--cond);letter-spacing:.14em;padding:8px 12px;text-transform:uppercase}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 56px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:12px;font:800 26px var(--cond);letter-spacing:.2em}
+.logo svg{width:34px;height:34px}
+nav{display:flex;gap:28px;align-items:center}
+nav button,nav a{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink);font:700 15px var(--cond);letter-spacing:.16em;text-transform:uppercase;padding:6px 0;cursor:pointer;text-decoration:none}
+nav button[aria-selected=true]{border-color:#fff}
+main{padding:0 56px 40px;max-width:1280px;margin:0 auto}
+.hero{padding:56px 0 28px}
+.hero h1{font:800 clamp(40px,7vw,84px)/1 var(--cond);letter-spacing:.06em;margin:0 0 16px;text-transform:uppercase}
+.hero p{color:var(--mute);max-width:620px;margin:0 0 28px;font-size:17px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.stats div{border:1px solid var(--line);padding:14px 16px}
+.stats b{display:block;font:800 30px var(--cond);letter-spacing:.06em}
+.stats span{color:var(--mute);font:600 12px var(--cond);letter-spacing:.16em;text-transform:uppercase}
+h2.sec{font:800 clamp(26px,4vw,40px) var(--cond);letter-spacing:.14em;text-transform:uppercase;margin:48px 0 0;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+h2.sec a{font:700 18px var(--cond);letter-spacing:.06em;color:#fff;text-decoration:none;text-transform:none}
+.tag{display:inline-block;border:1px solid #fff;font:600 16px var(--cond);padding:6px 12px;margin:26px 0 14px;letter-spacing:.08em;text-transform:uppercase}
+.light{background:var(--panel);color:#111;padding:22px}
+.light .note,.light label{color:#4a5560}
+label{display:block;font:700 13px var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:16px 0 6px}
+input,select{width:100%;padding:11px;border:1px solid #111;border-radius:0;background:#fff;color:#111;font:inherit}
+input[type=file]{padding:8px;background:#fff}
+input::file-selector-button{background:#111;color:#fff;border:0;padding:8px 14px;margin-right:12px;font:700 13px var(--cond);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+input:focus,select:focus,button:focus-visible,.drop:focus-within{outline:3px solid var(--amber);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>input{flex:1;min-width:140px}
+button{font:800 16px var(--cond);letter-spacing:.16em;text-transform:uppercase;padding:14px 26px;border:2px solid #fff;border-radius:0;background:#fff;color:#000;cursor:pointer}
+button:hover{background:#000;color:#fff}
+button.sm{padding:9px 14px;font-size:14px;background:#111;color:#fff;border-color:#111}
+button.sm:hover{background:#fff;color:#111}
+button:disabled{opacity:.45;cursor:not-allowed}
+.go{margin-top:28px;display:flex;align-items:center;gap:14px}
+.msg{margin-top:14px;font-size:14px;min-height:20px;word-break:break-word}
+.bad{color:var(--bad)}.good{color:var(--good)}
+.light .bad{color:#b3261e}.light .good{color:#1e7a46}
+.meter{height:6px;background:#cfd5da;margin-top:10px}
+.meter i{display:block;height:100%;width:0;background:var(--bad);transition:width .2s,background .2s}
+.note{font-size:13px;color:var(--mute);margin-top:8px}
+.drop{display:block;background:var(--panel);color:#111;border:2px dashed #111;padding:46px 20px;text-align:center;cursor:pointer;margin:0}
+.drop.over{background:#fff;border-style:solid}
+.drop b{display:block;font:800 30px var(--cond);letter-spacing:.14em;text-transform:uppercase;color:#111}
+.drop span{color:#4a5560;font-size:14px;font-weight:400;letter-spacing:0;text-transform:none}
+.railwrap{position:relative}
+.rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.tile{flex:0 0 min(300px,78%);height:190px;position:relative;scroll-snap-align:start;cursor:pointer;overflow:hidden;border:3px solid transparent;padding:0;background:#222;text-align:left;color:#fff}
+.tile:hover{background:#222;color:#fff}
+.tile.sel{border-color:#fff}
+.tile.sel::after{content:"✓ SELECTED";position:absolute;top:10px;right:10px;background:#fff;color:#000;font:800 12px var(--cond);letter-spacing:.14em;padding:3px 8px}
+.tile i{position:absolute;right:-6px;bottom:-26px;font:800 110px/1 var(--cond);font-style:normal;opacity:.22;letter-spacing:-.02em}
+.tile em{position:absolute;left:12px;bottom:12px;background:#000;color:#fff;font:700 17px var(--cond);font-style:normal;padding:6px 10px;letter-spacing:.04em;text-transform:uppercase}
+.t1{background:linear-gradient(135deg,#0b4fd1,#0a2a78)}.t2{background:linear-gradient(135deg,#0f8f7a,#073c47)}.t3{background:linear-gradient(135deg,#7a3fe0,#2a1659)}
+.t4{background:linear-gradient(135deg,#c9772a,#5c2a0c)}.t5{background:linear-gradient(135deg,#8a8f98,#2d3238)}.t6{background:repeating-linear-gradient(45deg,#111,#111 12px,#1d1f22 12px,#1d1f22 24px)}
+#next{position:absolute;right:0;top:75px;width:58px;height:58px;padding:0;background:#000;border:1px solid #fff;color:#fff;font-size:26px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.mode{background:var(--panel);color:#111;border:3px solid transparent;padding:18px;text-align:left;text-transform:none;letter-spacing:0;font:400 14px/1.4 "Segoe UI",system-ui,sans-serif}
+.mode:hover{background:#fff;color:#111}
+.mode b{display:block;font:800 20px var(--cond);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.mode.sel{border-color:#000;box-shadow:inset 0 0 0 3px #eceff1,inset 0 0 0 5px #000}
+.term{background:#0d0f11;border:1px solid var(--line);color:#7fe3a4;font:13px/1.6 Consolas,"Cascadia Mono",monospace;padding:16px;height:170px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin:0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:20px}
+.cols div{background:var(--panel);color:#111;padding:20px}
+.cols b{display:block;font:800 22px var(--cond);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.cols p{margin:0;font-size:14px;color:#3c4650}
+footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font:600 13px var(--cond);letter-spacing:.14em;text-transform:uppercase}
+.fb{position:fixed;right:0;top:34%;writing-mode:vertical-rl;background:#000;border:1px solid #fff;border-right:0;color:#fff;font:800 14px var(--cond);letter-spacing:.24em;padding:18px 9px;text-decoration:none;z-index:5;text-transform:uppercase}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,120px);background:#176b4d;color:#fff;font:700 15px var(--cond);letter-spacing:.06em;padding:18px 28px;transition:transform .3s;z-index:9;max-width:90vw;word-break:break-all}
+#toast.on{transform:translate(-50%,0)}
+@media(max-width:640px){header,main,footer{padding-left:18px;padding-right:18px}.fb{display:none}#next{display:none}}
+</style>
+</head>
+<body>
+<div class="bar">Zero uploads · Everything encrypts on your device · 6 methods · Steganography built in</div>
+<header>
+  <div class="logo"><svg viewBox="0 0 34 34" fill="none" stroke="#fff" stroke-width="3"><rect x="5" y="15" width="24" height="16"/><path d="M10 15V10a7 7 0 0 1 14 0v5"/><path d="M17 21v5" stroke-width="3.5"/></svg>VAULTLOCK</div>
+  <nav><button id="tabE" aria-selected="true">Encrypt</button><button id="tabD" aria-selected="false">Decrypt</button><a href="#how">How it works</a></nav>
+</header>
+<main>
+  <section class="hero">
+    <h1>Lock anything.<br>Hide everything.</h1>
+    <p>An all-in-one file encryption lab. Photos, videos, documents – wrap them in authenticated ciphers, or bury them inside an ordinary image or video.</p>
+    <div class="stats"><div><b>256-BIT</b><span>Keys</span></div><div><b>400,000</b><span>KDF rounds</span></div><div><b>6</b><span>Cipher modes</span></div><div><b>0 BYTES</b><span>Uploaded, ever</span></div></div>
+  </section>
+
+  <section id="encCard">
+    <h2 class="sec">Lock your files <a href="#how">How it works →</a></h2>
+    <div class="tag">Step 1 · Choose files</div>
+    <label class="drop" id="drop"><input id="eFiles" type="file" multiple hidden><b>Drop files here</b><span id="fnames">or click to browse · photos, videos, anything</span></label>
+
+    <div class="tag">Step 2 · Pick a method</div>
+    <div class="railwrap"><div class="rail" id="rail">
+      <button class="tile t1 sel" data-m="1"><i>AES</i><em>AES-256-GCM · Recommended</em></button>
+      <button class="tile t2" data-m="5"><i>2×</i><em>Cascade · AES + ChaCha20</em></button>
+      <button class="tile t3" data-m="4"><i>CC20</i><em>ChaCha20 + HMAC</em></button>
+      <button class="tile t4" data-m="2"><i>CBC</i><em>AES-256-CBC + HMAC</em></button>
+      <button class="tile t5" data-m="3"><i>CTR</i><em>AES-256-CTR + HMAC</em></button>
+      <button class="tile t6" data-m="6"><i>OTP</i><em>One-time pad</em></button>
+    </div><button id="next" aria-label="Next">→</button></div>
+    <div class="note" id="mNote"></div>
+    <div hidden><select id="eMethod"><option value="1">AES-256-GCM</option><option value="5">Cascade AES-256-GCM + ChaCha20</option><option value="4">ChaCha20 + HMAC</option><option value="2">AES-256-CBC + HMAC</option><option value="3">AES-256-CTR + HMAC</option><option value="6">One-time pad</option></select>
+    <select id="eMode"><option value="plain">plain</option><option value="append">append</option><option value="png">png</option></select></div>
+
+    <div id="pwBox">
+      <div class="tag">Step 3 · Set your key</div>
+      <div class="light">
+        <label for="ePw" style="margin-top:0">Password</label>
+        <div class="row"><input id="ePw" type="password" autocomplete="off"><button class="sm" type="button" id="ePwShow">Show</button></div>
+        <div class="meter"><i id="bar"></i></div>
+        <div class="note" id="strTxt"></div>
+        <div class="row" style="margin-top:12px">
+          <input id="gLen" type="number" min="12" max="128" value="24" style="flex:0 0 84px" aria-label="Length">
+          <button class="sm" type="button" id="gRand">Random password</button>
+          <button class="sm" type="button" id="gPhrase">Passphrase</button>
+        </div>
+        <div class="note">Save the password somewhere safe. Without it the file cannot be recovered.</div>
+        <label for="eKey">Optional key file (combined with the password)</label>
+        <input id="eKey" type="file">
+      </div>
+    </div>
+
+    <div class="tag">Step 4 · How to save</div>
+    <div class="modes">
+      <button class="mode sel" data-o="plain"><b>Locked file</b>Encrypted .locked file. Simple and strongest.</button>
+      <button class="mode" data-o="append"><b>Hide in any file</b>Buried behind a photo or video that still opens normally.</button>
+      <button class="mode" data-o="png"><b>Hide in pixels</b>Spread through an image's pixels. Output looks identical.</button>
+    </div>
+    <div id="carBox" class="hidden">
+      <div class="light" style="margin-top:10px"><label for="eCar" style="margin-top:0">Cover file (the photo or video to hide inside)</label><input id="eCar" type="file"><div class="note" id="carNote"></div></div>
+    </div>
+    <div class="go"><button id="btnE">Encrypt →</button></div>
+    <div class="msg" id="eMsg"></div>
+  </section>
+
+  <section id="decCard" class="hidden">
+    <h2 class="sec">Unlock your files</h2>
+    <div class="tag">Drop a locked file or a photo/video with hidden data</div>
+    <div class="light">
+      <label for="dFile" style="margin-top:0">File</label><input id="dFile" type="file">
+      <label for="dPw">Password</label>
+      <div class="row"><input id="dPw" type="password" autocomplete="off"><button class="sm" type="button" id="dPwShow">Show</button></div>
+      <label for="dKey">Key file (only if you used one)</label><input id="dKey" type="file">
+      <label for="dPad">Pad file (only for one-time pad)</label><input id="dPad" type="file">
+      <div class="note">The method is detected automatically, including data hidden inside images and videos.</div>
+    </div>
+    <div class="go"><button id="btnD">Decrypt →</button></div>
+    <div class="msg" id="dMsg"></div>
+  </section>
+
+  <h2 class="sec">Session log</h2>
+  <div class="tag">Live · SHA-256 fingerprint of every output</div>
+  <pre class="term" id="log"></pre>
+
+  <h2 class="sec" id="how">Under the hood</h2>
+  <div class="cols">
+    <div><b>Key derivation</b><p>PBKDF2-HMAC-SHA256, 400,000 rounds, random 16-byte salt. One derivation yields separate encryption and MAC keys. An optional key file is hashed and mixed in.</p></div>
+    <div><b>Authenticated</b><p>Every mode detects tampering: GCM tags, or encrypt-then-MAC with HMAC-SHA256 checked before decryption. Wrong keys fail cleanly.</p></div>
+    <div><b>Self-describing</b><p>Output carries a magic header, method ID, salt and nonce. The original filename is encrypted inside, so extensions are restored on decrypt.</p></div>
+    <div><b>Steganography</b><p>Append mode adds a trailer behind any file. Pixel mode writes bits into the lowest bit of image colour channels. Both carry the encrypted payload only.</p></div>
+  </div>
+</main>
+<footer>VaultLock · Runs 100% offline in your browser · Web Crypto API</footer>
+<a class="fb" href="#how">Security notes</a>
+<div id="toast"></div>
+
+<script>
+const S = crypto.subtle, enc = new TextEncoder(), dec = new TextDecoder();
+const $ = id => document.getElementById(id);
+const MAGIC = [86,76,75,49], TAG = enc.encode("VLKSTEGO"), ITER = 400000;
+const say = (el, t, c) => { el.textContent = t; el.className = "msg " + (c || ""); };
+const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; a.forEach(x => { o.set(x, p); p += x.length; }); return o; };
+const rand = n => { const o = new Uint8Array(n); for (let i = 0; i < n; i += 65536) crypto.getRandomValues(o.subarray(i, Math.min(n, i + 65536))); return o; };
+const ri = n => { const m = 2 ** 32 - (2 ** 32 % n); let x; do { x = crypto.getRandomValues(new Uint32Array(1))[0]; } while (x >= m); return x % n; };
+const bytes = async f => new Uint8Array(await f.arrayBuffer());
+function save(data, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data])); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+
+// ---------- ChaCha20 (RFC 8439 core) ----------
+const rotl = (v, c) => (v << c) | (v >>> (32 - c));
+function qr(x, a, b, c, d) {
+  x[a] += x[b]; x[d] = rotl(x[d] ^ x[a], 16); x[c] += x[d]; x[b] = rotl(x[b] ^ x[c], 12);
+  x[a] += x[b]; x[d] = rotl(x[d] ^ x[a], 8);  x[c] += x[d]; x[b] = rotl(x[b] ^ x[c], 7);
+}
+function chacha(key, nonce, data) {
+  const s = new Uint32Array(16), kv = new DataView(key.buffer, key.byteOffset, 32), nv = new DataView(nonce.buffer, nonce.byteOffset, 12);
+  s.set([0x61707865, 0x3320646e, 0x79622d32, 0x6b206574]);
+  for (let i = 0; i < 8; i++) s[4 + i] = kv.getUint32(i * 4, true);
+  for (let i = 0; i < 3; i++) s[13 + i] = nv.getUint32(i * 4, true);
+  const out = new Uint8Array(data.length);
+  for (let off = 0, ctr = 1; off < data.length; off += 64, ctr++) {
+    s[12] = ctr; const x = s.slice();
+    for (let r = 0; r < 10; r++) { qr(x,0,4,8,12); qr(x,1,5,9,13); qr(x,2,6,10,14); qr(x,3,7,11,15); qr(x,0,5,10,15); qr(x,1,6,11,12); qr(x,2,7,8,13); qr(x,3,4,9,14); }
+    for (let j = 0; j < 16; j++) x[j] += s[j];
+    const ks = new Uint8Array(x.buffer), n = Math.min(64, data.length - off);
+    for (let j = 0; j < n; j++) out[off + j] = data[off + j] ^ ks[j];
+  }
+  return out;
+}
+
+// ---------- key derivation and core encrypt / decrypt ----------
+async function derive(pw, kf, salt) {
+  let pb = enc.encode(pw);
+  if (kf) pb = cat(pb, new Uint8Array(await S.digest("SHA-256", kf)));
+  const base = await S.importKey("raw", pb, "PBKDF2", false, ["deriveBits"]);
+  const K = new Uint8Array(await S.deriveBits({name:"PBKDF2", salt, iterations:ITER, hash:"SHA-256"}, base, 1024));
+  return [0, 32, 64, 96].map(o => K.slice(o, o + 32));
+}
+const aesk = (k, n) => S.importKey("raw", k, n, false, ["encrypt", "decrypt"]);
+const hk = k => S.importKey("raw", k, {name:"HMAC", hash:"SHA-256"}, false, ["sign", "verify"]);
+const gcm = async (op, k, n, d) => new Uint8Array(await S[op]({name:"AES-GCM", iv:n}, await aesk(k, "AES-GCM"), d));
+
+async function seal(m, data, pw, kf) {
+  const salt = rand(16), iv = rand(16), head = cat(MAGIC, [m], salt, iv), k = await derive(pw, kf, salt), n = iv.slice(0, 12);
+  let ct;
+  if (m === 1) return cat(head, new Uint8Array(await S.encrypt({name:"AES-GCM", iv:n, additionalData:head}, await aesk(k[0], "AES-GCM"), data)));
+  if (m === 2) ct = new Uint8Array(await S.encrypt({name:"AES-CBC", iv}, await aesk(k[0], "AES-CBC"), data));
+  if (m === 3) ct = new Uint8Array(await S.encrypt({name:"AES-CTR", counter:iv, length:64}, await aesk(k[0], "AES-CTR"), data));
+  if (m === 4) ct = chacha(k[2], n, data);
+  if (m === 5) ct = chacha(k[2], n, await gcm("encrypt", k[0], n, data));
+  const body = cat(head, ct);
+  return cat(body, new Uint8Array(await S.sign("HMAC", await hk(k[1]), body)));
+}
+async function open(b, pw, kf, pad) {
+  const m = b[4];
+  if (m === 6) {
+    const ct = b.slice(37); if (!pad) throw new Error("This file needs its pad file."); if (pad.length !== ct.length) throw new Error("Pad file does not match this file.");
+    return ct.map((v, i) => v ^ pad[i]);
+  }
+  const salt = b.slice(5, 21), iv = b.slice(21, 37), n = iv.slice(0, 12), k = await derive(pw, kf, salt);
+  if (m === 1) return new Uint8Array(await S.decrypt({name:"AES-GCM", iv:n, additionalData:b.slice(0, 37)}, await aesk(k[0], "AES-GCM"), b.slice(37)));
+  const body = b.slice(0, -32);
+  if (!await S.verify("HMAC", await hk(k[1]), b.slice(-32), body)) throw new Error("bad");
+  const ct = body.slice(37);
+  if (m === 2) return new Uint8Array(await S.decrypt({name:"AES-CBC", iv}, await aesk(k[0], "AES-CBC"), ct));
+  if (m === 3) return new Uint8Array(await S.decrypt({name:"AES-CTR", counter:iv, length:64}, await aesk(k[0], "AES-CTR"), ct));
+  if (m === 4) return chacha(k[2], n, ct);
+  if (m === 5) return gcm("decrypt", k[0], n, chacha(k[2], n, ct));
+  throw new Error("Unknown method.");
+}
+const pack = (name, d) => { const nb = enc.encode(name); const o = new Uint8Array(2 + nb.length + d.length); o[0] = nb.length >> 8; o[1] = nb.length & 255; o.set(nb, 2); o.set(d, 2 + nb.length); return o; };
+const unpack = p => { const l = (p[0] << 8) | p[1]; return [dec.decode(p.slice(2, 2 + l)), p.slice(2 + l)]; };
+
+// ---------- steganography ----------
+const bitmapOf = async f => { const bm = await createImageBitmap(f), c = document.createElement("canvas"); c.width = bm.width; c.height = bm.height; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, 0, 0); return [c, x, x.getImageData(0, 0, c.width, c.height)]; };
+const capacity = img => Math.floor(img.width * img.height * 3 / 8) - 4;
+async function hidePng(file, payload) {
+  const [c, x, img] = await bitmapOf(file);
+  if (payload.length > capacity(img)) throw new Error(`Image too small. It can hide ${capacity(img)} bytes but the data is ${payload.length} bytes. Use a bigger image or the "inside any file" option.`);
+  const all = cat(new Uint8Array(new Uint32Array([payload.length]).buffer), payload), d = img.data;
+  for (let i = 0, nb = all.length * 8; i < nb; i++) { const idx = ((i / 3) | 0) * 4 + (i % 3); d[idx] = (d[idx] & 254) | ((all[i >> 3] >> (i & 7)) & 1); }
+  x.putImageData(img, 0, 0);
+  return new Promise(r => c.toBlob(r, "image/png"));
+}
+async function readPng(file) {
+  try {
+    const d = (await bitmapOf(file))[2].data, get = n => { const o = new Uint8Array(n); return o; };
+    const rd = (start, n) => { const o = get(n); for (let i = 0; i < n * 8; i++) { const b = start * 8 + i, idx = ((b / 3) | 0) * 4 + (b % 3); o[i >> 3] |= (d[idx] & 1) << (i & 7); } return o; };
+    const len = new DataView(rd(0, 4).buffer).getUint32(0, true);
+    if (len < 40 || len > d.length * 3 / 8 - 4) return null;
+    const p = rd(4, len); return MAGIC.every((v, i) => p[i] === v) ? p : null;
+  } catch (e) { return null; }
+}
+function readTrailer(b) {
+  const L = b.length; if (L < 12 + 40) return null;
+  for (let i = 0; i < 8; i++) if (b[L - 8 + i] !== TAG[i]) return null;
+  const len = new DataView(b.buffer, b.byteOffset + L - 12, 4).getUint32(0, true);
+  return len <= L - 12 ? b.slice(L - 12 - len, L - 12) : null;
+}
+
+// ---------- password tools ----------
+const WORDS = "amber anchor apple arrow aspen atlas badge bacon beach birch blaze bloom bolt brave brick bridge cabin candle canyon cedar chalk cherry cliff cloud cobalt comet coral crane crest daisy delta denim desert dune eagle ember falcon fern flint forest fossil frost garden ginger glacier granite harbor hazel heron honey iris island ivory jade jungle kayak lagoon lantern lemon lotus maple marble meadow mint mosaic nectar noble oak ocean olive onyx orchid otter panda pearl pepper pine planet plum prairie quartz raven reef ridge river robin saddle sage sand shadow silver sky slate spruce storm summit sunset thunder tiger topaz tulip valley velvet violet walnut willow winter wolf yarrow zephyr".split(" ");
+const CH = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*-_=+?";
+function setPw(v) { $("ePw").value = v; $("ePw").type = "text"; $("ePwShow").textContent = "Hide"; meter(); }
+$("gRand").onclick = () => { const n = Math.max(12, Math.min(128, +$("gLen").value || 24)); let s = ""; for (let i = 0; i < n; i++) s += CH[ri(CH.length)]; setPw(s); };
+$("gPhrase").onclick = () => { const w = []; for (let i = 0; i < 7; i++) w.push(WORDS[ri(WORDS.length)]); setPw(w.join("-") + "-" + (10 + ri(90))); };
+function meter() {
+  const p = $("ePw").value; let pool = 0;
+  if (/[a-z]/.test(p)) pool += 26; if (/[A-Z]/.test(p)) pool += 26; if (/\d/.test(p)) pool += 10; if (/[^\w]|_/.test(p)) pool += 32;
+  const bits = pool ? p.length * Math.log2(pool) : 0, lv = bits < 40 ? 0 : bits < 60 ? 1 : bits < 85 ? 2 : 3;
+  $("bar").style.width = Math.min(100, bits / 100 * 100) + "%"; $("bar").style.background = ["var(--bad)", "var(--amber)", "var(--good)", "var(--good)"][lv];
+  $("strTxt").textContent = p ? ["Weak","Okay","Strong","Excellent"][lv] + ` (about ${Math.round(bits)} bits)` : "Type your own, or let VaultLock suggest one.";
+}
+$("ePw").oninput = meter;
+[["ePwShow","ePw"],["dPwShow","dPw"]].forEach(([b, i]) => $(b).onclick = () => { const s = $(i).type === "password"; $(i).type = s ? "text" : "password"; $(b).textContent = s ? "Hide" : "Show"; });
+
+// ---------- UI ----------
+const NOTES = {1:"Fast, authenticated, the standard choice. Best for most files.",2:"Classic AES-CBC with a separate integrity check (encrypt-then-MAC).",3:"Stream-style AES counter mode with an integrity check.",4:"Modern stream cipher used by TLS and WireGuard, with an integrity check.",5:"Two different ciphers stacked. An attacker would have to break both.",6:"Makes a random pad file as long as your file. The pad is the key, so keep it apart from the .locked file. No password needed."};
+function ui() {
+  const m = $("eMethod").value, md = $("eMode").value;
+  $("mNote").textContent = NOTES[m]; $("pwBox").classList.toggle("hidden", m === "6"); $("carBox").classList.toggle("hidden", md === "plain");
+  $("carNote").textContent = md === "png" ? "Output is a PNG that looks identical. Hides one file; needs a big image (about 1 MB of data per 3 megapixels)." : "Works with JPG, PNG, MP4 and most other formats. The cover file keeps working normally. Hides one file.";
+}
+$("eMethod").onchange = $("eMode").onchange = ui; ui();
+const tab = e => { $("encCard").classList.toggle("hidden", !e); $("decCard").classList.toggle("hidden", e); $("tabE").setAttribute("aria-selected", e); $("tabD").setAttribute("aria-selected", !e); };
+$("tabE").onclick = () => tab(true); $("tabD").onclick = () => tab(false);
+
+$("btnE").onclick = async () => {
+  const files = [...$("eFiles").files], m = +$("eMethod").value, md = $("eMode").value, pw = $("ePw").value, out = $("eMsg"), car = $("eCar").files[0];
+  if (!files.length) return say(out, "Choose at least one file.", "bad");
+  if (m !== 6 && !pw) return say(out, "Enter or generate a password.", "bad");
+  if (md !== "plain" && !car) return say(out, "Choose a cover photo or video.", "bad");
+  $("btnE").disabled = true;
+  try {
+    const kf = $("eKey").files[0] ? await bytes($("eKey").files[0]) : null;
+    for (const f of (md === "plain" ? files : files.slice(0, 1))) {
+      say(out, `Encrypting ${f.name}…`);
+      const plain = pack(f.name, await bytes(f)); let blob, pad;
+      if (m === 6) { pad = rand(plain.length); blob = cat(new Uint8Array(MAGIC), [6], new Uint8Array(32), plain.map((v, i) => v ^ pad[i])); }
+      else blob = await seal(m, plain, pw, kf);
+      if (md === "plain") { save(blob, f.name + ".locked"); if (pad) setTimeout(() => save(pad, f.name + ".pad"), 600); }
+      else if (md === "append") { const len = new Uint8Array(new Uint32Array([blob.length]).buffer); save(cat(await bytes(car), blob, len, TAG), "vl_" + car.name); }
+      else { say(out, "Hiding data in image pixels…"); save(await hidePng(car, blob), car.name.replace(/\.[^.]*$/, "") + "_stego.png"); if (pad) setTimeout(() => save(pad, f.name + ".pad"), 600); }
+    }
+    say(out, (m === 6 ? "Done. Keep the .pad file safe, it is your key. " : "Done. ") + (md !== "plain" && files.length > 1 ? "Only the first file was hidden; do the others one by one." : "Your download should start."), "good");
+  } catch (e) { say(out, e.message || "Something went wrong.", "bad"); }
+  $("btnE").disabled = false;
+};
+
+$("btnD").onclick = async () => {
+  const f = $("dFile").files[0], out = $("dMsg");
+  if (!f) return say(out, "Choose a file.", "bad");
+  $("btnD").disabled = true;
+  try {
+    say(out, "Looking for hidden data…");
+    const b = await bytes(f); let blob = readTrailer(b);
+    if (!blob && (b[0] === 0x89 || b[0] === 0xFF)) blob = await readPng(f);
+    if (!blob && MAGIC.every((v, i) => b[i] === v)) blob = b;
+    if (!blob) throw new Error("No VaultLock data found in this file.");
+    const kf = $("dKey").files[0] ? await bytes($("dKey").files[0]) : null, pad = $("dPad").files[0] ? await bytes($("dPad").files[0]) : null;
+    if (blob[4] !== 6 && !$("dPw").value) throw new Error("Enter the password.");
+    say(out, "Decrypting…");
+    let plain;
+    try { plain = await open(blob, $("dPw").value, kf, pad); } catch (e) { throw new Error(/pad/i.test(e.message) ? e.message : "Wrong password or key file, or the data is damaged."); }
+    const [name, data] = unpack(plain); save(data, name || "decrypted");
+    say(out, "Decrypted. Saved as " + (name || "decrypted"), "good");
+  } catch (e) { say(out, e.message, "bad"); }
+  $("btnD").disabled = false;
+};
+</script>
+<script>
+const hx = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+const log = t => { const l = $("log"); l.textContent += `[${new Date().toLocaleTimeString()}] ${t}\n`; l.scrollTop = l.scrollHeight; };
+const toast = t => { const e = $("toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), 4500); };
+log("Session started. Nothing leaves this device.");
+const _save = save;
+save = async (d, n) => { _save(d, n); const ab = await new Blob([d]).arrayBuffer(); log(`Saved ${n} · ${ab.byteLength.toLocaleString()} bytes`); log("SHA-256 " + hx(await S.digest("SHA-256", ab))); toast("Saved " + n + " ✓"); };
+$("btnE").addEventListener("click", () => log(`Encrypt: ${$("eMethod").selectedOptions[0].text} · mode ${$("eMode").value}`));
+$("btnD").addEventListener("click", () => log("Decrypt requested"));
+function sync() { document.querySelectorAll("[data-m]").forEach(t => t.classList.toggle("sel", t.dataset.m === $("eMethod").value)); document.querySelectorAll("[data-o]").forEach(t => t.classList.toggle("sel", t.dataset.o === $("eMode").value)); }
+const fire = i => $(i).dispatchEvent(new Event("change"));
+document.querySelectorAll("[data-m]").forEach(t => t.onclick = () => { $("eMethod").value = t.dataset.m; fire("eMethod"); sync(); });
+document.querySelectorAll("[data-o]").forEach(t => t.onclick = () => { $("eMode").value = t.dataset.o; fire("eMode"); sync(); });
+const names = () => { const f = [...$("eFiles").files]; $("fnames").textContent = f.length ? f.map(x => x.name).join(", ") + ` · ${(f.reduce((n, x) => n + x.size, 0) / 1048576).toFixed(2)} MB` : "or click to browse · photos, videos, anything"; };
+$("eFiles").onchange = names;
+const dz = $("drop");
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("over"); }; dz.ondragleave = () => dz.classList.remove("over");
+dz.ondrop = e => { e.preventDefault(); dz.classList.remove("over"); $("eFiles").files = e.dataTransfer.files; names(); };
+$("next").onclick = () => $("rail").scrollBy({left: 300, behavior: "smooth"});
+meter(); sync();
+</script>
+</body>
+</html>
