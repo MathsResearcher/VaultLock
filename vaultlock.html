@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VaultLock – Military-grade file encryption</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src blob: data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>VaultLock – Browser-based file encryption and steganography</title>
 <style>
 :root{color-scheme:dark;--bg:#17191c;--panel:#eceff1;--ink:#fff;--mute:#9aa4ad;--line:#2c3238;--bad:#d93025;--amber:#e8a33d;--good:#2e9e5b;--teal:#fff;--on:#000;--cond:Bahnschrift,"Arial Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif}
 *{box-sizing:border-box}
@@ -62,7 +63,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .tile.sel::after{content:"✓ SELECTED";position:absolute;top:10px;right:10px;background:#fff;color:#000;font:800 12px var(--cond);letter-spacing:.14em;padding:3px 8px}
 .tile i{position:absolute;right:-6px;bottom:-26px;font:800 110px/1 var(--cond);font-style:normal;opacity:.22;letter-spacing:-.02em}
 .tile em{position:absolute;left:12px;bottom:12px;background:#000;color:#fff;font:700 17px var(--cond);font-style:normal;padding:6px 10px;letter-spacing:.04em;text-transform:uppercase}
-.t1{background:linear-gradient(135deg,#0b4fd1,#0a2a78)}.t2{background:linear-gradient(135deg,#0f8f7a,#073c47)}.t3{background:linear-gradient(135deg,#7a3fe0,#2a1659)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.t7{background:linear-gradient(135deg,#b3261e,#4a0f0c)}.t8{background:linear-gradient(135deg,#1d1f22,#6b7280)}.t1{background:linear-gradient(135deg,#0b4fd1,#0a2a78)}.t2{background:linear-gradient(135deg,#0f8f7a,#073c47)}.t3{background:linear-gradient(135deg,#7a3fe0,#2a1659)}
 .t4{background:linear-gradient(135deg,#c9772a,#5c2a0c)}.t5{background:linear-gradient(135deg,#8a8f98,#2d3238)}.t6{background:repeating-linear-gradient(45deg,#111,#111 12px,#1d1f22 12px,#1d1f22 24px)}
 #next{position:absolute;right:0;top:75px;width:58px;height:58px;padding:0;background:#000;border:1px solid #fff;color:#fff;font-size:26px}
 .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
@@ -83,7 +84,7 @@ footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font
 </style>
 </head>
 <body>
-<div class="bar">Zero uploads · Everything encrypts on your device · 6 methods · Steganography built in</div>
+<div class="bar">Zero uploads · Everything encrypts on your device · 8 methods · Steganography built in</div>
 <header>
   <div class="logo"><svg viewBox="0 0 34 34" fill="none" stroke="#fff" stroke-width="3"><rect x="5" y="15" width="24" height="16"/><path d="M10 15V10a7 7 0 0 1 14 0v5"/><path d="M17 21v5" stroke-width="3.5"/></svg>VAULTLOCK</div>
   <nav><button id="tabE" aria-selected="true">Encrypt</button><button id="tabD" aria-selected="false">Decrypt</button><a href="#how">How it works</a></nav>
@@ -92,13 +93,13 @@ footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font
   <section class="hero">
     <h1>Lock anything.<br>Hide everything.</h1>
     <p>An all-in-one file encryption lab. Photos, videos, documents – wrap them in authenticated ciphers, or bury them inside an ordinary image or video.</p>
-    <div class="stats"><div><b>256-BIT</b><span>Keys</span></div><div><b>400,000</b><span>KDF rounds</span></div><div><b>6</b><span>Cipher modes</span></div><div><b>0 BYTES</b><span>Uploaded, ever</span></div></div>
+    <div class="stats"><div><b>256-BIT</b><span>Keys</span></div><div><b>600,000</b><span>KDF rounds</span></div><div><b>8</b><span>Cipher modes</span></div><div><b>0 BYTES</b><span>Uploaded, ever</span></div></div>
   </section>
 
   <section id="encCard">
     <h2 class="sec">Lock your files <a href="#how">How it works →</a></h2>
     <div class="tag">Step 1 · Choose files</div>
-    <label class="drop" id="drop"><input id="eFiles" type="file" multiple hidden><b>Drop files here</b><span id="fnames">or click to browse · photos, videos, anything</span></label>
+    <label class="drop" id="drop"><input id="eFiles" type="file" multiple class="vh"><b>Drop files here</b><span id="fnames">or click to browse · photos, videos, anything</span></label>
 
     <div class="tag">Step 2 · Pick a method</div>
     <div class="railwrap"><div class="rail" id="rail">
@@ -107,10 +108,12 @@ footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font
       <button class="tile t3" data-m="4"><i>CC20</i><em>ChaCha20 + HMAC</em></button>
       <button class="tile t4" data-m="2"><i>CBC</i><em>AES-256-CBC + HMAC</em></button>
       <button class="tile t5" data-m="3"><i>CTR</i><em>AES-256-CTR + HMAC</em></button>
+      <button class="tile t7" data-m="7"><i>XC20</i><em>XChaCha20 + HMAC</em></button>
+      <button class="tile t8" data-m="8"><i>3×</i><em>Triple · AES + XChaCha20 + CTR</em></button>
       <button class="tile t6" data-m="6"><i>OTP</i><em>One-time pad</em></button>
     </div><button id="next" aria-label="Next">→</button></div>
     <div class="note" id="mNote"></div>
-    <div hidden><select id="eMethod"><option value="1">AES-256-GCM</option><option value="5">Cascade AES-256-GCM + ChaCha20</option><option value="4">ChaCha20 + HMAC</option><option value="2">AES-256-CBC + HMAC</option><option value="3">AES-256-CTR + HMAC</option><option value="6">One-time pad</option></select>
+    <div hidden><select id="eMethod"><option value="1">AES-256-GCM</option><option value="5">Cascade AES-256-GCM + ChaCha20</option><option value="4">ChaCha20 + HMAC</option><option value="2">AES-256-CBC + HMAC</option><option value="3">AES-256-CTR + HMAC</option><option value="7">XChaCha20 + HMAC</option><option value="8">Triple layer</option><option value="6">One-time pad</option></select>
     <select id="eMode"><option value="plain">plain</option><option value="append">append</option><option value="png">png</option></select></div>
 
     <div id="pwBox">
@@ -140,8 +143,9 @@ footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font
     <div id="carBox" class="hidden">
       <div class="light" style="margin-top:10px"><label for="eCar" style="margin-top:0">Cover file (the photo or video to hide inside)</label><input id="eCar" type="file"><div class="note" id="carNote"></div></div>
     </div>
+    <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font:400 14px sans-serif;margin-top:16px"><input type="checkbox" id="eRand" style="width:auto"> Use a random output name (hides the original file name)</label>
     <div class="go"><button id="btnE">Encrypt →</button></div>
-    <div class="msg" id="eMsg"></div>
+    <div class="msg" id="eMsg" role="status"></div>
   </section>
 
   <section id="decCard" class="hidden">
@@ -156,7 +160,7 @@ footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font
       <div class="note">The method is detected automatically, including data hidden inside images and videos.</div>
     </div>
     <div class="go"><button id="btnD">Decrypt →</button></div>
-    <div class="msg" id="dMsg"></div>
+    <div class="msg" id="dMsg" role="status"></div>
   </section>
 
   <h2 class="sec">Session log</h2>
@@ -165,20 +169,21 @@ footer{border-top:1px solid var(--line);padding:24px 56px;color:var(--mute);font
 
   <h2 class="sec" id="how">Under the hood</h2>
   <div class="cols">
-    <div><b>Key derivation</b><p>PBKDF2-HMAC-SHA256, 400,000 rounds, random 16-byte salt. One derivation yields separate encryption and MAC keys. An optional key file is hashed and mixed in.</p></div>
-    <div><b>Authenticated</b><p>Every mode detects tampering: GCM tags, or encrypt-then-MAC with HMAC-SHA256 checked before decryption. Wrong keys fail cleanly.</p></div>
+    <div><b>Key derivation</b><p>PBKDF2-HMAC-SHA256, 600,000 rounds, random 16-byte salt, then HKDF splits the result into independent cipher and MAC keys. An optional key file is hashed and mixed in.</p></div>
+    <div><b>Authenticated</b><p>Every password mode detects tampering (the one-time pad has no integrity check by design): GCM tags, or encrypt-then-MAC with HMAC-SHA256 checked before decryption. Wrong keys fail cleanly.</p></div>
     <div><b>Self-describing</b><p>Output carries a magic header, method ID, salt and nonce. The original filename is encrypted inside, so extensions are restored on decrypt.</p></div>
     <div><b>Steganography</b><p>Append mode adds a trailer behind any file. Pixel mode writes bits into the lowest bit of image colour channels. Both carry the encrypted payload only.</p></div>
   </div>
 </main>
 <footer>VaultLock · Runs 100% offline in your browser · Web Crypto API</footer>
 <a class="fb" href="#how">Security notes</a>
-<div id="toast"></div>
+<div id="toast" role="status"></div>
 
 <script>
 const S = crypto.subtle, enc = new TextEncoder(), dec = new TextDecoder();
 const $ = id => document.getElementById(id);
-const MAGIC = [86,76,75,49], TAG = enc.encode("VLKSTEGO"), ITER = 400000;
+// Header (37 B): "VLK2" | method | salt(16) | iv(16); then ciphertext; HMAC-SHA256 (32 B) on methods 2-5,7,8
+const MAGIC = [86,76,75,50], TAG = enc.encode("VLKSTEGO"), ITER = 600000;
 const say = (el, t, c) => { el.textContent = t; el.className = "msg " + (c || ""); };
 const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; a.forEach(x => { o.set(x, p); p += x.length; }); return o; };
 const rand = n => { const o = new Uint8Array(n); for (let i = 0; i < n; i += 65536) crypto.getRandomValues(o.subarray(i, Math.min(n, i + 65536))); return o; };
@@ -208,13 +213,28 @@ function chacha(key, nonce, data) {
   return out;
 }
 
+// XChaCha20: HChaCha20 turns key + 16-byte nonce into a one-time subkey, then plain ChaCha20 runs on it
+function hchacha(key, n16) {
+  const kv = new DataView(key.buffer, key.byteOffset, 32), nv = new DataView(n16.buffer, n16.byteOffset, 16), x = new Uint32Array(16);
+  x.set([0x61707865, 0x3320646e, 0x79622d32, 0x6b206574]);
+  for (let i = 0; i < 8; i++) x[4 + i] = kv.getUint32(i * 4, true);
+  for (let i = 0; i < 4; i++) x[12 + i] = nv.getUint32(i * 4, true);
+  for (let r = 0; r < 10; r++) { qr(x,0,4,8,12); qr(x,1,5,9,13); qr(x,2,6,10,14); qr(x,3,7,11,15); qr(x,0,5,10,15); qr(x,1,6,11,12); qr(x,2,7,8,13); qr(x,3,4,9,14); }
+  const o = new Uint8Array(32), ov = new DataView(o.buffer);
+  [0, 1, 2, 3, 12, 13, 14, 15].forEach((j, i) => ov.setUint32(i * 4, x[j], true));
+  return o;
+}
+const xchacha = (key, iv, data) => chacha(hchacha(key, iv), new Uint8Array(12), data);
+const ctr = async (op, k, iv, d) => new Uint8Array(await S[op]({name:"AES-CTR", counter:iv, length:64}, await aesk(k, "AES-CTR"), d));
+
 // ---------- key derivation and core encrypt / decrypt ----------
 async function derive(pw, kf, salt) {
-  let pb = enc.encode(pw);
+  let pb = enc.encode(pw.normalize("NFKC"));
   if (kf) pb = cat(pb, new Uint8Array(await S.digest("SHA-256", kf)));
   const base = await S.importKey("raw", pb, "PBKDF2", false, ["deriveBits"]);
-  const K = new Uint8Array(await S.deriveBits({name:"PBKDF2", salt, iterations:ITER, hash:"SHA-256"}, base, 1024));
-  return [0, 32, 64, 96].map(o => K.slice(o, o + 32));
+  const master = await S.deriveBits({name:"PBKDF2", salt, iterations:ITER, hash:"SHA-256"}, base, 256);
+  const hk = await S.importKey("raw", master, "HKDF", false, ["deriveBits"]);
+  return Promise.all([0, 1, 2, 3].map(async i => new Uint8Array(await S.deriveBits({name:"HKDF", hash:"SHA-256", salt:new Uint8Array(0), info:enc.encode("VLK2 key " + i)}, hk, 256))));
 }
 const aesk = (k, n) => S.importKey("raw", k, n, false, ["encrypt", "decrypt"]);
 const hk = k => S.importKey("raw", k, {name:"HMAC", hash:"SHA-256"}, false, ["sign", "verify"]);
@@ -228,6 +248,8 @@ async function seal(m, data, pw, kf) {
   if (m === 3) ct = new Uint8Array(await S.encrypt({name:"AES-CTR", counter:iv, length:64}, await aesk(k[0], "AES-CTR"), data));
   if (m === 4) ct = chacha(k[2], n, data);
   if (m === 5) ct = chacha(k[2], n, await gcm("encrypt", k[0], n, data));
+  if (m === 7) ct = xchacha(k[2], iv, data);
+  if (m === 8) ct = await ctr("encrypt", k[3], iv, xchacha(k[2], iv, await gcm("encrypt", k[0], n, data)));
   const body = cat(head, ct);
   return cat(body, new Uint8Array(await S.sign("HMAC", await hk(k[1]), body)));
 }
@@ -246,6 +268,8 @@ async function open(b, pw, kf, pad) {
   if (m === 3) return new Uint8Array(await S.decrypt({name:"AES-CTR", counter:iv, length:64}, await aesk(k[0], "AES-CTR"), ct));
   if (m === 4) return chacha(k[2], n, ct);
   if (m === 5) return gcm("decrypt", k[0], n, chacha(k[2], n, ct));
+  if (m === 7) return xchacha(k[2], iv, ct);
+  if (m === 8) return gcm("decrypt", k[0], n, xchacha(k[2], iv, await ctr("decrypt", k[3], iv, ct)));
   throw new Error("Unknown method.");
 }
 const pack = (name, d) => { const nb = enc.encode(name); const o = new Uint8Array(2 + nb.length + d.length); o[0] = nb.length >> 8; o[1] = nb.length & 255; o.set(nb, 2); o.set(d, 2 + nb.length); return o; };
@@ -267,7 +291,7 @@ async function readPng(file) {
     const d = (await bitmapOf(file))[2].data, get = n => { const o = new Uint8Array(n); return o; };
     const rd = (start, n) => { const o = get(n); for (let i = 0; i < n * 8; i++) { const b = start * 8 + i, idx = ((b / 3) | 0) * 4 + (b % 3); o[i >> 3] |= (d[idx] & 1) << (i & 7); } return o; };
     const len = new DataView(rd(0, 4).buffer).getUint32(0, true);
-    if (len < 40 || len > d.length * 3 / 8 - 4) return null;
+    if (len < 40 || len > d.length * 3 / 32 - 4) return null;
     const p = rd(4, len); return MAGIC.every((v, i) => p[i] === v) ? p : null;
   } catch (e) { return null; }
 }
@@ -287,7 +311,7 @@ $("gPhrase").onclick = () => { const w = []; for (let i = 0; i < 7; i++) w.push(
 function meter() {
   const p = $("ePw").value; let pool = 0;
   if (/[a-z]/.test(p)) pool += 26; if (/[A-Z]/.test(p)) pool += 26; if (/\d/.test(p)) pool += 10; if (/[^\w]|_/.test(p)) pool += 32;
-  const bits = pool ? p.length * Math.log2(pool) : 0, lv = bits < 40 ? 0 : bits < 60 ? 1 : bits < 85 ? 2 : 3;
+  let bits = pool ? p.length * Math.log2(pool) : 0; if (/password|passw0rd|qwerty|letmein|welcome|admin|iloveyou|0123|1234|2345|3456|4567|5678|6789|abcd|bcde|cdef|(.)/i.test(p)) bits = Math.min(bits, 30); const lv = bits < 40 ? 0 : bits < 60 ? 1 : bits < 85 ? 2 : 3;
   $("bar").style.width = Math.min(100, bits / 100 * 100) + "%"; $("bar").style.background = ["var(--bad)", "var(--amber)", "var(--good)", "var(--good)"][lv];
   $("strTxt").textContent = p ? ["Weak","Okay","Strong","Excellent"][lv] + ` (about ${Math.round(bits)} bits)` : "Type your own, or let VaultLock suggest one.";
 }
@@ -295,7 +319,7 @@ $("ePw").oninput = meter;
 [["ePwShow","ePw"],["dPwShow","dPw"]].forEach(([b, i]) => $(b).onclick = () => { const s = $(i).type === "password"; $(i).type = s ? "text" : "password"; $(b).textContent = s ? "Hide" : "Show"; });
 
 // ---------- UI ----------
-const NOTES = {1:"Fast, authenticated, the standard choice. Best for most files.",2:"Classic AES-CBC with a separate integrity check (encrypt-then-MAC).",3:"Stream-style AES counter mode with an integrity check.",4:"Modern stream cipher used by TLS and WireGuard, with an integrity check.",5:"Two different ciphers stacked. An attacker would have to break both.",6:"Makes a random pad file as long as your file. The pad is the key, so keep it apart from the .locked file. No password needed."};
+const NOTES = {7:"XChaCha20 with a fresh one-time subkey per file, plus an integrity check.",8:"Three stacked layers (AES-GCM, XChaCha20, AES-CTR), each with its own key, plus an outer integrity check. Slowest, deepest.",1:"Fast, authenticated, the standard choice. Best for most files.",2:"Classic AES-CBC with a separate integrity check (encrypt-then-MAC).",3:"Stream-style AES counter mode with an integrity check.",4:"Modern stream cipher used by TLS and WireGuard, with an integrity check.",5:"Two different ciphers stacked. An attacker would have to break both.",6:"Makes a random pad file as long as your file. The pad is the key, so keep it apart from the .locked file. No password needed."};
 function ui() {
   const m = $("eMethod").value, md = $("eMode").value;
   $("mNote").textContent = NOTES[m]; $("pwBox").classList.toggle("hidden", m === "6"); $("carBox").classList.toggle("hidden", md === "plain");
@@ -308,6 +332,7 @@ $("tabE").onclick = () => tab(true); $("tabD").onclick = () => tab(false);
 $("btnE").onclick = async () => {
   const files = [...$("eFiles").files], m = +$("eMethod").value, md = $("eMode").value, pw = $("ePw").value, out = $("eMsg"), car = $("eCar").files[0];
   if (!files.length) return say(out, "Choose at least one file.", "bad");
+  if (files.some(f => f.size > 4e8)) return say(out, "A file is over 400 MB. The browser may run out of memory, so use a smaller file.", "bad");
   if (m !== 6 && !pw) return say(out, "Enter or generate a password.", "bad");
   if (md !== "plain" && !car) return say(out, "Choose a cover photo or video.", "bad");
   $("btnE").disabled = true;
@@ -315,12 +340,12 @@ $("btnE").onclick = async () => {
     const kf = $("eKey").files[0] ? await bytes($("eKey").files[0]) : null;
     for (const f of (md === "plain" ? files : files.slice(0, 1))) {
       say(out, `Encrypting ${f.name}…`);
-      const plain = pack(f.name, await bytes(f)); let blob, pad;
+      const plain = pack(f.name, await bytes(f)), nm = $("eRand").checked ? "vl_" + hx(rand(6)) : f.name; let blob, pad;
       if (m === 6) { pad = rand(plain.length); blob = cat(new Uint8Array(MAGIC), [6], new Uint8Array(32), plain.map((v, i) => v ^ pad[i])); }
       else blob = await seal(m, plain, pw, kf);
-      if (md === "plain") { save(blob, f.name + ".locked"); if (pad) setTimeout(() => save(pad, f.name + ".pad"), 600); }
+      if (md === "plain") { save(blob, nm + ".locked"); if (pad) setTimeout(() => save(pad, nm + ".pad"), 600); }
       else if (md === "append") { const len = new Uint8Array(new Uint32Array([blob.length]).buffer); save(cat(await bytes(car), blob, len, TAG), "vl_" + car.name); }
-      else { say(out, "Hiding data in image pixels…"); save(await hidePng(car, blob), car.name.replace(/\.[^.]*$/, "") + "_stego.png"); if (pad) setTimeout(() => save(pad, f.name + ".pad"), 600); }
+      else { say(out, "Hiding data in image pixels…"); save(await hidePng(car, blob), car.name.replace(/\.[^.]*$/, "") + "_stego.png"); if (pad) setTimeout(() => save(pad, nm + ".pad"), 600); }
     }
     say(out, (m === 6 ? "Done. Keep the .pad file safe, it is your key. " : "Done. ") + (md !== "plain" && files.length > 1 ? "Only the first file was hidden; do the others one by one." : "Your download should start."), "good");
   } catch (e) { say(out, e.message || "Something went wrong.", "bad"); }
@@ -347,8 +372,7 @@ $("btnD").onclick = async () => {
   } catch (e) { say(out, e.message, "bad"); }
   $("btnD").disabled = false;
 };
-</script>
-<script>
+
 const hx = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
 const log = t => { const l = $("log"); l.textContent += `[${new Date().toLocaleTimeString()}] ${t}\n`; l.scrollTop = l.scrollHeight; };
 const toast = t => { const e = $("toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), 4500); };
